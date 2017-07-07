@@ -21,11 +21,12 @@ from settings import *
 
 
 save_model = True  # if weights will be saved
-T_board = True  # use tensorboard
+T_board = True  # use Tensorboard
 
 
 # Training parameters
-USE_ROI_LOSS = False    # use roi (large loss weights for obstacle positions)
+USE_ROI_LOSS = False    # use roi (add loss weights in obstacle positions)
+THRESHOLD = 0.5    # # re-threshold generated images
 INTERVAL = 2    # sampling frequency in simulator
 nb_epoch = 100
 batch_size = 4
@@ -33,8 +34,8 @@ samples_per_epoch = 500
 N_seq_val = 100  # number of sequences to use for validation
 
 # Save model files
-weights_file = os.path.join(WEIGHTS_DIR, 'prednet_weights_Interval_' + str(INTERVAL) + 'USE_ROI_' + str(USE_ROI_LOSS) + '.hdf5')
-json_file = os.path.join(WEIGHTS_DIR, 'prednet_model_Interval_' + str(INTERVAL) + 'USE_ROI_' + str(USE_ROI_LOSS) + '.json')
+weights_file = os.path.join(WEIGHTS_DIR, 'prednet_weights_Interval_' + str(INTERVAL) + '_USE_ROI_' + str(USE_ROI_LOSS) + '_thres_' + str(THRESHOLD) + '.hdf5')
+json_file = os.path.join(WEIGHTS_DIR, 'prednet_model_Interval_' + str(INTERVAL) + '_USE_ROI_' + str(USE_ROI_LOSS) + '_thres_' + str(THRESHOLD) + '.json')
 
 # Model parameters
 nt = 10  # time step
@@ -53,7 +54,7 @@ time_loss_weights[0] = 0    # step 0 with 0 loss
 # Construct the model
 prednet = PredNet(stack_sizes, R_stack_sizes,
                   A_filt_sizes, Ahat_filt_sizes, R_filt_sizes,
-                  output_mode='error', return_sequences=True, unroll=True, use_roi_loss=USE_ROI_LOSS)
+                  output_mode='error', return_sequences=True, unroll=True, use_roi_loss=USE_ROI_LOSS, threshold=THRESHOLD)
 inputs = Input(shape=(nt,) + input_shape)   # (?, nt, im_size, im_size, channel)
 errors = prednet(inputs)    # (?, nt, nb_layers)
 

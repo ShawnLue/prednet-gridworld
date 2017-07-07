@@ -59,12 +59,14 @@ class PredNet(Recurrent):
                 'prediction', 'target', and 'error' units respectively.
         extrap_start_time: time step for which model will start extrapolating.
             Starting at this time step, the prediction from the previous time step will be treated as the "actual"
+        use_roi_loss: add loss on region of interests(domain specific)
+        threshold: manually threshold
     '''
     def __init__(self, stack_sizes, R_stack_sizes,
                  A_filt_sizes, Ahat_filt_sizes, R_filt_sizes,
                  pixel_max=1., error_activation='relu', A_activation='relu',
                  LSTM_activation='tanh', LSTM_inner_activation='hard_sigmoid',
-                 output_mode='error', extrap_start_time=None, use_roi_loss=False, **kwargs):
+                 output_mode='error', extrap_start_time=None, use_roi_loss=False, threshold=None, **kwargs):
         self.stack_sizes = stack_sizes  # output_dim for each layer
         self.nb_layers = len(stack_sizes)  # layer num
         assert len(R_stack_sizes) == self.nb_layers, 'len(R_stack_sizes) must equal len(stack_sizes)'
@@ -78,6 +80,7 @@ class PredNet(Recurrent):
 
         self.extrap_start_time = extrap_start_time
         self.use_roi_loss = use_roi_loss
+        self.threshold = threshold
 
         self.pixel_max = pixel_max
         self.error_activation = activations.get(error_activation)
@@ -261,10 +264,10 @@ class PredNet(Recurrent):
             if l == 0:
                 ahat = K.minimum(ahat, self.pixel_max)
                 frame_prediction = ahat
-                ###
-                # where = K.greater_equal(frame_prediction, K.constant(0.15))
-                # frame_prediction = tf.where(where, 0.5 * tf.ones_like(frame_prediction, dtype=tf.float32),
-                #                             tf.zeros_like(frame_prediction, dtype=tf.float32))
+                ### threshold
+                where = K.greater_equal(frame_prediction, K.constant(self.threshold))
+                frame_prediction = tf.where(where, 0.5 * tf.ones_like(frame_prediction, dtype=tf.float32),
+                                            tf.zeros_like(frame_prediction, dtype=tf.float32))
                 ###
             # compute errors
             e_up = ahat - a
@@ -337,6 +340,8 @@ class PredNet(Recurrent):
                   'LSTM_activation': self.LSTM_activation.__name__,
                   'LSTM_inner_activation': self.LSTM_inner_activation.__name__,
                   'extrap_start_time': self.extrap_start_time,
-                  'output_mode': self.output_mode}
+                  'output_mode': self.output_mode,
+                  'use_roi_loss': self.use_roi_loss,
+                  'threshold': self.threshold}
         base_config = super(PredNet, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))

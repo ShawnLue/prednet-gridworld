@@ -19,16 +19,17 @@ from settings import *
 
 
 # hyper-parameters for evaluation
-INTERVAL = 2
-USE_ROI_LOSS = False
+INTERVAL = 2    # sampling frequency in simulator
+THRESHOLD = 0.5 # re-threshold generated images
+USE_ROI_LOSS = False    # use roi (large loss weights for obstacle positions)
 batch_size = 5
 nt = 10
 dim = 1
-EXTRAP = None
+EXTRAP = None   #
 
 # Read the model files
-weights_file = os.path.join(WEIGHTS_DIR, 'prednet_weights_Interval_' + str(INTERVAL) + 'USE_ROI_' + str(USE_ROI_LOSS) + '.hdf5')
-json_file = os.path.join(WEIGHTS_DIR, 'prednet_model_Interval_' + str(INTERVAL) + 'USE_ROI_' + str(USE_ROI_LOSS) + '.json')
+weights_file = os.path.join(WEIGHTS_DIR, 'prednet_weights_Interval_' + str(INTERVAL) + '_USE_ROI_' + str(USE_ROI_LOSS) + '_thres_' + str(THRESHOLD) + '.hdf5')
+json_file = os.path.join(WEIGHTS_DIR, 'prednet_model_Interval_' + str(INTERVAL) + '_USE_ROI_' + str(USE_ROI_LOSS) + '_thres_' + str(THRESHOLD) + '.json')
 
 # Load trained model
 f = open(json_file, 'r')
