@@ -1,0 +1,5 @@
+./output_data
+./.idea
+*.pyc
+rsync.py
+
